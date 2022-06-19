@@ -71,8 +71,11 @@ bool UAliOSSFunctionLibrary::DeleteBudget(const FOSSAccountInfo& AccountInfo)
 		",message:" << outcome.error().Message() <<
 		",requestId:" << outcome.error().RequestId() << std::endl;
 		ShutdownSdk();
+		UE_LOG(LogTemp, Warning, TEXT("delete failed!"));
+
 		return false;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("delete succeed!"));
 
 	/*释放网络等资源。*/
 	ShutdownSdk();
