@@ -5,11 +5,6 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class FAliOSSServerModule : public IModuleInterface
-{
-public:
+DECLARE_LOG_CATEGORY_EXTERN(LogOSSServer, Log, All);
 
-	/** IModuleInterface implementation */
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
-};
+

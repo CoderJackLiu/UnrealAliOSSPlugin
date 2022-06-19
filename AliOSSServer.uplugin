@@ -4,21 +4,23 @@
 	"VersionName": "1.0",
 	"FriendlyName": "AliOSSServer",
 	"Description": "",
-	"Category": "Other",
+	"Category": "OSSServer",
 	"CreatedBy": "BringMeMyGuitar",
 	"CreatedByURL": "",
 	"DocsURL": "",
 	"MarketplaceURL": "",
-	"SupportURL": "",
+	"SupportURL": "https://help.aliyun.com/document_detail/106556.html",
+	"EnabledByDefault": true,
 	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
-	"Installed": false,
+	"Installed": true,
 	"Modules": [
 		{
 			"Name": "AliOSSServer",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PreDefault",
+			"PlatformAllowList": [ "Win64" ]
 		}
 	]
 }
