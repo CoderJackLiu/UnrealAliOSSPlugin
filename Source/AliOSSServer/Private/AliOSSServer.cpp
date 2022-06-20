@@ -3,10 +3,10 @@
 #include "AliOSSServer.h"
 
 #include "Interfaces/IPluginManager.h"
+#include "AliOSSDataTypes.h"
 
 #define LOCTEXT_NAMESPACE "FAliOSSServerModule"
 
-DEFINE_LOG_CATEGORY(LogOSSServer);
 
 class FAliOSSServerModule : public IModuleInterface
 {

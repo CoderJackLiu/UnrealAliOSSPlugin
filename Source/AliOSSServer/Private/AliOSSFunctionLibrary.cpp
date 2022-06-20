@@ -9,36 +9,27 @@
 
 using namespace AlibabaCloud::OSS;
 
-bool UAliOSSFunctionLibrary::CreateBudget(const FOSSAccountInfo& AccountInfo)
+bool UAliOSSFunctionLibrary::CreateBudget(const FOSSAccountInfo& AccountInfo, const FString& BucketName)
 {
-
 	/* 初始化网络等资源 */
 	InitializeSdk();
 
-	ClientConfiguration conf;
-	OssClient client(TCHAR_TO_ANSI(*AccountInfo.Endpoint), TCHAR_TO_ANSI(*AccountInfo.AccessKeyId), TCHAR_TO_ANSI(*AccountInfo.AccessKeySecret), conf);
+	OssClient Client = GetDefaultOssClient(AccountInfo);
 
 	/* 指定新创建Bucket的名称、存储类型和ACL */
-	CreateBucketRequest request(TCHAR_TO_ANSI(*AccountInfo.BucketName), StorageClass::IA, CannedAccessControlList::PublicReadWrite);
+	CreateBucketRequest request(TCHAR_TO_ANSI(*BucketName), StorageClass::IA, CannedAccessControlList::PublicReadWrite);
 
 	/* 创建Bucket */
-	auto outcome = client.CreateBucket(request);
+	auto outcome = Client.CreateBucket(request);
 
 	if (!outcome.isSuccess())
 	{
 		/* 异常处理 */
-		//todo liu 转化为UE_LOG！
-		std::cout << "CreateBucket fail" <<
-			",code:" << outcome.error().Code() <<
-			",message:" << outcome.error().Message() <<
-			",requestId:" << outcome.error().RequestId() << std::endl;
-
+		AlibabaPrintOut("CreateBucket fail", outcome.error().Code().c_str(), outcome.error().Message().c_str(), outcome.error().RequestId().c_str());
 		ShutdownSdk();
-		UE_LOG(LogTemp, Warning, TEXT("Create failed!"));
 		return false;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Create Succeed!!"));
-
 	/* 释放网络等资源 */
 	ShutdownSdk();
 	return false;
@@ -46,33 +37,26 @@ bool UAliOSSFunctionLibrary::CreateBudget(const FOSSAccountInfo& AccountInfo)
 
 bool UAliOSSFunctionLibrary::CreateBudgetType(const FOSSAccountInfo& AccountInfo, StorageClass Type, CannedAccessControlList ControlList)
 {
-	
 	return false;
 }
 
-bool UAliOSSFunctionLibrary::DeleteBudget(const FOSSAccountInfo& AccountInfo)
+bool UAliOSSFunctionLibrary::DeleteBudget(const FOSSAccountInfo& AccountInfo, const FString& BucketName)
 {
 	/*初始化网络等资源。*/
 	InitializeSdk();
-	ClientConfiguration conf;
-	// OssClient client(Endpoint, AccessKeyId, AccessKeySecret, conf);
-	OssClient client(TCHAR_TO_ANSI(*AccountInfo.Endpoint), TCHAR_TO_ANSI(*AccountInfo.AccessKeyId), TCHAR_TO_ANSI(*AccountInfo.AccessKeySecret), conf);
+	OssClient Client = GetDefaultOssClient(AccountInfo);
 
 	/*删除Bucket。*/
-	DeleteBucketRequest request(TCHAR_TO_ANSI(*AccountInfo.BucketName));
-   
-	auto outcome = client.DeleteBucket(request);
+	DeleteBucketRequest request(TCHAR_TO_ANSI(*BucketName));
+
+	auto outcome = Client.DeleteBucket(request);
 
 	//todo 修改为unreal log 弹出窗口，显示返回信息！
-	if (!outcome.isSuccess()) {
+	if (!outcome.isSuccess())
+	{
 		/*异常处理。*/
-		std::cout << "DeleteBucket fail" <<
-		",code:" << outcome.error().Code() <<
-		",message:" << outcome.error().Message() <<
-		",requestId:" << outcome.error().RequestId() << std::endl;
+		AlibabaPrintOut("DeleteBucket fail", outcome.error().Code().c_str(), outcome.error().Message().c_str(), outcome.error().RequestId().c_str());
 		ShutdownSdk();
-		UE_LOG(LogTemp, Warning, TEXT("delete failed!"));
-
 		return false;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("delete succeed!"));
@@ -80,4 +64,64 @@ bool UAliOSSFunctionLibrary::DeleteBudget(const FOSSAccountInfo& AccountInfo)
 	/*释放网络等资源。*/
 	ShutdownSdk();
 	return true;
+}
+
+TArray<FString> UAliOSSFunctionLibrary::ListBucket(const FOSSAccountInfo& AccountInfo)
+{
+	/*初始化网络等资源。*/
+	InitializeSdk();
+	OssClient client = GetDefaultOssClient(AccountInfo);
+	/*列举当前账号下的所有存储空间。*/
+	ListBucketsRequest request;
+	auto outcome = client.ListBuckets(request);
+	TArray<FString> Infos;
+	if (outcome.isSuccess())
+	{
+		for (auto result : outcome.result().Buckets())
+		{
+			Infos.Add(result.Name().c_str());
+			UE_LOG(LogTemp, Warning, TEXT("BucketName is %s"), *result.Name().c_str());
+		}
+	}
+	else
+	{
+		/*异常处理。*/
+		AlibabaPrintOut("ListBuckets fail", outcome.error().Code().c_str(), outcome.error().Code().c_str(), outcome.error().Code().c_str());
+		ShutdownSdk();
+		return TArray<FString>();
+	}
+	/*释放网络等资源。*/
+	ShutdownSdk();
+	return Infos;
+}
+
+bool UAliOSSFunctionLibrary::HasBucket(const FOSSAccountInfo& AccountInfo, const FString& BucketName)
+{
+	/* 初始化网络等资源 */
+	InitializeSdk();
+
+	OssClient Client = GetDefaultOssClient(AccountInfo);
+	/* 判断存储空间是否存在 */
+	if (Client.DoesBucketExist(TCHAR_TO_ANSI(*BucketName))) {    
+		std::cout << " The Bucket exists" << std::endl;
+	}
+	else {
+		std::cout << "The Bucket does not exist" << std::endl;
+	}
+
+	/* 释放网络等资源 */
+	ShutdownSdk();
+	return false;
+}
+
+OssClient UAliOSSFunctionLibrary::GetDefaultOssClient(const FOSSAccountInfo& AccountInfo)
+{
+	const ClientConfiguration Config;
+	OssClient Client(AccountInfo.GetEndpoint(), AccountInfo.GetAccessId(), AccountInfo.GetAccessKeySecret(), Config);
+	return Client;
+}
+
+void UAliOSSFunctionLibrary::AlibabaPrintOut(const FString& FailedTitle, const FString& Code, const FString& Message, const FString& RequestId)
+{
+	UE_LOG(LogOSSServer, Error, TEXT("%s : code is : %s ;\n Message is %s ;\n RequestId is %s; \n"), *FailedTitle, *Code, *Message, *RequestId);
 }

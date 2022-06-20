@@ -4,8 +4,7 @@
 #include "TestOSSActor.h"
 #include <alibabacloud/oss/OssClient.h>
 
-#include "AliOSSDataTypes.h"
-#include "AliOSSFunctionLibrary.h"
+
 using namespace AlibabaCloud::OSS;
 
 //https://help.aliyun.com/document_detail/106556.html

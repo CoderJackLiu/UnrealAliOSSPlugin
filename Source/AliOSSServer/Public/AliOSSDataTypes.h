@@ -9,6 +9,7 @@
 /**
  * 
  */
+DECLARE_LOG_CATEGORY_EXTERN(LogOSSServer, Log, All);
 
 USTRUCT(BlueprintType, Category = "OSS Runtime")
 /** The name, size, shape, and type of the tensor */
@@ -36,8 +37,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ONNX Runtime")
 	FString Endpoint;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ONNX Runtime")
-	FString BucketName;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ONNX Runtime")
+	// FString BucketName;
+	
+	std::string GetAccessId() const {return TCHAR_TO_ANSI(*AccessKeyId);}
+	std::string GetAccessKeySecret() const {return TCHAR_TO_ANSI(*AccessKeyId);}
+	std::string GetEndpoint() const {return TCHAR_TO_ANSI(*AccessKeyId);}
+	
 };
 
 

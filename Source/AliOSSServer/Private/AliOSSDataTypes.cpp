@@ -3,6 +3,8 @@
 
 #include "AliOSSDataTypes.h"
 
+DEFINE_LOG_CATEGORY(LogOSSServer);
+
 FOSSAccountInfo::FOSSAccountInfo()
 {
 }
@@ -13,7 +15,7 @@ FOSSAccountInfo::FOSSAccountInfo(const std::string& InAccessKeyId, const std::st
 	AccessKeyId = InAccessKeyId.c_str();
 	AccessKeySecret = InAccessKeySecret.c_str();
 	Endpoint = InEndpoint.c_str();
-	BucketName = InBucketName.c_str();
+	// BucketName = InBucketName.c_str();
 }
 
 FOSSAccountInfo::FOSSAccountInfo(const FString& InAccessKeyId, const FString& InAccessKeySecret, const FString& InEndpoint, const FString& InBucketName)
@@ -21,5 +23,5 @@ FOSSAccountInfo::FOSSAccountInfo(const FString& InAccessKeyId, const FString& In
 	AccessKeyId = InAccessKeyId;
 	AccessKeySecret = InAccessKeySecret;
 	Endpoint = InEndpoint;
-	BucketName = InBucketName;
+	// BucketName = InBucketName;
 }
