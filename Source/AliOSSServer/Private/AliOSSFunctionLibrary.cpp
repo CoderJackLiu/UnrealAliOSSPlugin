@@ -2,8 +2,8 @@
 
 #include "AliOSSFunctionLibrary.h"
 
+#include <fstream>
 #include <OssClient.h>
-
 #include "AliOSSDataTypes.h"
 
 
@@ -95,17 +95,19 @@ TArray<FString> UAliOSSFunctionLibrary::ListBucket(const FOSSAccountInfo& Accoun
 	return Infos;
 }
 
-bool UAliOSSFunctionLibrary::HasBucket(const FOSSAccountInfo& AccountInfo, const FString& BucketName)
+bool UAliOSSFunctionLibrary::DoesBucketExist(const FOSSAccountInfo& AccountInfo, const FString& BucketName)
 {
 	/* 初始化网络等资源 */
 	InitializeSdk();
 
-	OssClient Client = GetDefaultOssClient(AccountInfo);
+	const OssClient Client = GetDefaultOssClient(AccountInfo);
 	/* 判断存储空间是否存在 */
-	if (Client.DoesBucketExist(TCHAR_TO_ANSI(*BucketName))) {    
+	if (Client.DoesBucketExist(TCHAR_TO_ANSI(*BucketName)))
+	{
 		std::cout << " The Bucket exists" << std::endl;
 	}
-	else {
+	else
+	{
 		std::cout << "The Bucket does not exist" << std::endl;
 	}
 
@@ -113,6 +115,70 @@ bool UAliOSSFunctionLibrary::HasBucket(const FOSSAccountInfo& AccountInfo, const
 	ShutdownSdk();
 	return false;
 }
+
+bool UAliOSSFunctionLibrary::OssUploadAFile(const FOSSAccountInfo& AccountInfo, const FString& BucketName, const FString& FilePath, const FString& UploadPath)
+{
+	/* 初始化网络等资源。*/
+	InitializeSdk();
+	/* 初始化OSS账号信息。*/
+	const OssClient Client = GetDefaultOssClient(AccountInfo);
+
+	/* 填写本地文件完整路径，例如D:\\localpath\\examplefile.txt，其中localpath为本地文件examplefile.txt所在本地路径。*/
+	// std::shared_ptr<std::iostream> content = std::make_shared<std::fstream>("D:\\localpath\\examplefile.txt", std::ios::in | std::ios::binary);
+	std::shared_ptr<std::iostream> content = std::make_shared<std::fstream>(TCHAR_TO_ANSI(*FilePath), std::ios::in | std::ios::binary);
+	PutObjectRequest request(TCHAR_TO_ANSI(*BucketName), TCHAR_TO_ANSI(*UploadPath),  content);
+
+	/*（可选）请参见如下示例设置访问权限ACL为私有（private）以及存储类型为标准存储（Standard）。*/
+	//request.MetaData().addHeader("x-oss-object-acl", "private");
+	//request.MetaData().addHeader("x-oss-storage-class", "Standard");
+
+	auto outcome = Client.PutObject(request);
+
+	if (!outcome.isSuccess())
+	{
+		/* 异常处理。*/
+		AlibabaPrintOut("PutObject fail", outcome.error().Code().c_str(), outcome.error().Code().c_str(), outcome.error().Code().c_str());
+		ShutdownSdk();
+		return false;
+	}
+	/* 释放网络等资源。*/
+	ShutdownSdk();
+	return false;
+}
+
+bool UAliOSSFunctionLibrary::OssUploadObjectDataFromMemory(const FOSSAccountInfo& AccountInfo, const FString& BucketName, const FString& FilePath, const FString& UploadPath)
+{
+	/* 初始化网络等资源。*/
+	InitializeSdk();
+	OssClient client= GetDefaultOssClient(AccountInfo);
+	
+	//todo liu 
+	std::shared_ptr<std::iostream> Content = std::make_shared<std::stringstream>();
+	*Content << "Thank you for using Alibaba Cloud Object Storage Service!";
+	PutObjectRequest request(TCHAR_TO_ANSI(*BucketName), TCHAR_TO_ANSI(*UploadPath), Content);
+
+	/*（可选）请参见如下示例设置访问权限ACL为私有（private）以及存储类型为标准存储（Standard）。*/
+	//request.MetaData().addHeader("x-oss-object-acl", "private");
+	//request.MetaData().addHeader("x-oss-storage-class", "Standard");
+
+	auto outcome = client.PutObject(request);
+
+	if (!outcome.isSuccess()) {
+		/* 异常处理。*/
+		AlibabaPrintOut("PutObject fail", outcome.error().Code().c_str(), outcome.error().Code().c_str(), outcome.error().Code().c_str());
+		ShutdownSdk();
+		return false;
+	}
+
+	/* 释放网络等资源。*/
+	ShutdownSdk();
+	return true;
+}
+
+
+/*
+ * AlibabaOSS utilities!
+ */
 
 OssClient UAliOSSFunctionLibrary::GetDefaultOssClient(const FOSSAccountInfo& AccountInfo)
 {

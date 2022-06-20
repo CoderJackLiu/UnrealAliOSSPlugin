@@ -25,6 +25,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AliOSSServer|Bucket")
 	static bool CreateBudget(const FOSSAccountInfo& AccountInfo, const FString& BucketName);
 
+	/*
+	 * Bucket functions! 
+	 */
 	//todo liu convert enum types!
 	// UFUNCTION(BlueprintPure, Category="AliOSSServer")
 	static bool CreateBudgetType(const FOSSAccountInfo& AccountInfo, AlibabaCloud::OSS::StorageClass Type = AlibabaCloud::OSS::IA,
@@ -37,9 +40,30 @@ public:
 	static TArray<FString> ListBucket(const FOSSAccountInfo& AccountInfo);
 
 	UFUNCTION(BlueprintCallable, Category="AliOSSServer|Bucket")
-	static bool HasBucket(const FOSSAccountInfo& AccountInfo,const FString& BucketName);
-	
+	static bool DoesBucketExist(const FOSSAccountInfo& AccountInfo,const FString& BucketName);
 
+
+	
+	/*
+	 * upload files functions !
+	 * 
+	 */
+
+	//上传一个文件
+	UFUNCTION(BlueprintCallable, Category="AliOSSServer|Upload")
+	static bool OssUploadAFile(const FOSSAccountInfo& AccountInfo,const FString& BucketName,const FString & FilePath, const FString & UploadPath);
+
+	//内存上传一串数据
+	UFUNCTION(BlueprintCallable, Category="AliOSSServer|Upload")
+	static bool OssUploadObjectDataFromMemory(const FOSSAccountInfo& AccountInfo,const FString& BucketName,const FString & FilePath, const FString & UploadPath);
+
+	//追加上传
+	// UFUNCTION(BlueprintCallable, Category="AliOSSServer|Upload")
+	// static bool OssUploadObjectDataFromMemory(const FOSSAccountInfo& AccountInfo,const FString& BucketName,const FString & FilePath, const FString & UploadPath);
+
+	
+	
+	
 	/*
 	 * Utilities function
 	 * 

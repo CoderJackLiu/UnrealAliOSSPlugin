@@ -9,8 +9,7 @@ FOSSAccountInfo::FOSSAccountInfo()
 {
 }
 
-FOSSAccountInfo::FOSSAccountInfo(const std::string& InAccessKeyId, const std::string& InAccessKeySecret, const std::string& InEndpoint,
-                                 const std::string& InBucketName)
+FOSSAccountInfo::FOSSAccountInfo(const std::string& InAccessKeyId, const std::string& InAccessKeySecret, const std::string& InEndpoint,const std::string& InBucketName)
 {
 	AccessKeyId = InAccessKeyId.c_str();
 	AccessKeySecret = InAccessKeySecret.c_str();
