@@ -40,10 +40,9 @@ public:
 	static TArray<FString> ListBucket(const FOSSAccountInfo& AccountInfo);
 
 	UFUNCTION(BlueprintCallable, Category="AliOSSServer|Bucket")
-	static bool DoesBucketExist(const FOSSAccountInfo& AccountInfo,const FString& BucketName);
+	static bool DoesBucketExist(const FOSSAccountInfo& AccountInfo, const FString& BucketName);
 
 
-	
 	/*
 	 * upload files functions !
 	 * 
@@ -51,29 +50,49 @@ public:
 
 	//上传一个文件
 	UFUNCTION(BlueprintCallable, Category="AliOSSServer|Upload")
-	static bool OssUploadAFile(const FOSSAccountInfo& AccountInfo,const FString& BucketName,const FString & FilePath, const FString & UploadPath);
+	static bool OssUploadAFile(const FOSSAccountInfo& AccountInfo, const FString& BucketName, const FString& FilePath, const FString& UploadPath);
 
 	//内存上传一串数据
 	UFUNCTION(BlueprintCallable, Category="AliOSSServer|Upload")
-	static bool OssUploadObjectDataFromMemory(const FOSSAccountInfo& AccountInfo,const FString& BucketName,const FString & FilePath, const FString & UploadPath);
+	static bool OssUploadObjectDataFromMemory(const FOSSAccountInfo& AccountInfo, const FString& BucketName, const FString& FilePath, const FString& UploadPath);
 
 	//追加上传
 	UFUNCTION(BlueprintCallable, Category="AliOSSServer|Upload")
-	static bool OssAppendUploadDataFromMemory(const FOSSAccountInfo& AccountInfo,const FString& BucketName,const FString & FilePath, const FString & UploadPath);
+	static bool OssAppendUploadDataFromMemory(const FOSSAccountInfo& AccountInfo, const FString& BucketName, const FString& UploadPath);
+	
+	UFUNCTION(BlueprintCallable, Category="AliOSSServer|Upload")
+	static bool OssUploadWithProgress(const FOSSAccountInfo& AccountInfo, const FString& BucketName, const FString& ObjectName);
+
 
 	
 	
+	/*
+	 * download files
+	 * 下载文件 相关
+	 */
+	UFUNCTION(BlueprintCallable, Category="AliOSSServer|DownLoad")
+	static bool OssDownLoadAFile(const FOSSAccountInfo& AccountInfo, const FString& BucketName, const FString& ObjectName, const FString& SaveFileToPath);
 	
+	UFUNCTION(BlueprintCallable, Category="AliOSSServer|DownLoad")
+	static bool OssDownLoadAFileToMemory(const FOSSAccountInfo& AccountInfo, const FString& BucketName, const FString& ObjectName);
+
+
 	/*
 	 * Utilities function
 	 * 
 	 */
 	UFUNCTION(BlueprintCallable, Category="AliOSSServer|Print")
 	// static void AlibabaPrintOut(const FString& FailedTitle, const FString& Code = FString(), const FString& Message = FString(), const FString& RequestId = FString());
-	static void AlibabaPrintOut(const FString& FailedTitle, const FString& Code, const FString& Message, const FString& RequestId);
+	static void AlibabaOutComePrintOut(const FString& FailedTitle, const FString& Code, const FString& Message, const FString& RequestId);
+	
+	static void AlibabaPrintOut(const FString& FailedTitle);
+	
+	static void AlibabaGetOutComePrintOut(const FString& FailedTitle,AlibabaCloud::OSS::GetObjectOutcome OutCome);
+	
+	static void AlibabaPutOutComePrintOut(const FString& FailedTitle,AlibabaCloud::OSS::PutObjectOutcome OutCome);
 
 
 	static AlibabaCloud::OSS::OssClient GetDefaultOssClient(const FOSSAccountInfo& AccountInfo);
 
-	
+	static std::string ToStdString(const FString& InStr);
 };
