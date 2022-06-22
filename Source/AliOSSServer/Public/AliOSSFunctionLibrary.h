@@ -58,8 +58,8 @@ public:
 	static bool OssUploadObjectDataFromMemory(const FOSSAccountInfo& AccountInfo,const FString& BucketName,const FString & FilePath, const FString & UploadPath);
 
 	//追加上传
-	// UFUNCTION(BlueprintCallable, Category="AliOSSServer|Upload")
-	// static bool OssUploadObjectDataFromMemory(const FOSSAccountInfo& AccountInfo,const FString& BucketName,const FString & FilePath, const FString & UploadPath);
+	UFUNCTION(BlueprintCallable, Category="AliOSSServer|Upload")
+	static bool OssAppendUploadDataFromMemory(const FOSSAccountInfo& AccountInfo,const FString& BucketName,const FString & FilePath, const FString & UploadPath);
 
 	
 	

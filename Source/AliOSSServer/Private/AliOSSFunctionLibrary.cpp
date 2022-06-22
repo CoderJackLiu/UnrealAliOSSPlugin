@@ -175,6 +175,62 @@ bool UAliOSSFunctionLibrary::OssUploadObjectDataFromMemory(const FOSSAccountInfo
 	return true;
 }
 
+bool UAliOSSFunctionLibrary::OssAppendUploadDataFromMemory(const FOSSAccountInfo& AccountInfo, const FString& BucketName, const FString& FilePath,
+	const FString& UploadPath)
+{
+	 /* 初始化OSS账号信息。*/
+
+    /* 填写Object完整路径，完整路径中不能包含Bucket名称，例如exampledir/exampleobject.txt。*/
+    std::string ObjectName = "exampledir/exampleobject.txt";
+
+    /* 初始化网络等资源。*/
+    InitializeSdk();
+
+    ClientConfiguration conf;
+	OssClient client= GetDefaultOssClient(AccountInfo);
+
+    auto meta = ObjectMetaData();
+    meta.setContentType("text/plain");
+
+    /* 第一次追加的位置是0，返回值为下一次追加的位置。后续追加的位置是追加前文件的长度。*/
+    std::shared_ptr<std::iostream> content1 = std::make_shared<std::stringstream>();
+    *content1 <<"Thank you for using Aliyun Object Storage Service!";
+    AppendObjectRequest request(TCHAR_TO_ANSI(*BucketName),TCHAR_TO_ANSI(*UploadPath),  content1, meta);
+	// PutObjectRequest request(TCHAR_TO_ANSI(*BucketName), TCHAR_TO_ANSI(*UploadPath), Content);
+
+    request.setPosition(0L);
+
+    /* 第一次追加文件。*/
+    auto result = client.AppendObject(request);
+
+    if (!result.isSuccess()) {
+        /* 异常处理。*/
+    	AlibabaPrintOut("AppendObject fail", result.error().Code().c_str(), result.error().Code().c_str(), result.error().Code().c_str());
+        ShutdownSdk();
+        return false;
+    }
+
+    std::shared_ptr<std::iostream> content2 = std::make_shared<std::stringstream>();
+    *content2 <<"Thank you for using Aliyun Object Storage Service!";
+    auto position = result.result().Length();
+    AppendObjectRequest appendObjectRequest(TCHAR_TO_ANSI(*BucketName), ObjectName, content2);
+    appendObjectRequest.setPosition(position);
+
+    /* 第二次追加文件。*/
+    auto outcome = client.AppendObject(appendObjectRequest);
+
+    if (!outcome.isSuccess()) {
+        /* 异常处理。*/
+    	AlibabaPrintOut("AppendObject fail", outcome.error().Code().c_str(), outcome.error().Code().c_str(), outcome.error().Code().c_str());
+        ShutdownSdk();
+        return false;
+    }
+
+    /* 释放网络等资源。*/
+    ShutdownSdk();
+    return true;
+}
+
 
 /*
  * AlibabaOSS utilities!
