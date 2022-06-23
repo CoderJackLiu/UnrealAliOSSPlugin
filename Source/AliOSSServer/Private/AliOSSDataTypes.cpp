@@ -14,7 +14,6 @@ FOSSAccountInfo::FOSSAccountInfo(const std::string& InAccessKeyId, const std::st
 	AccessKeyId = InAccessKeyId.c_str();
 	AccessKeySecret = InAccessKeySecret.c_str();
 	Endpoint = InEndpoint.c_str();
-	// BucketName = InBucketName.c_str();
 }
 
 FOSSAccountInfo::FOSSAccountInfo(const FString& InAccessKeyId, const FString& InAccessKeySecret, const FString& InEndpoint, const FString& InBucketName)
@@ -22,5 +21,30 @@ FOSSAccountInfo::FOSSAccountInfo(const FString& InAccessKeyId, const FString& In
 	AccessKeyId = InAccessKeyId;
 	AccessKeySecret = InAccessKeySecret;
 	Endpoint = InEndpoint;
-	// BucketName = InBucketName;
+}
+
+FOssFileInfo::FOssFileInfo()
+{
+}
+
+FOssFileInfo::FOssFileInfo(const std::string& InName, const int64_t& InSize, const std::string& InLastModified, const std::string& InStorageClass,
+                           const std::string& InType, const std::string& InOwner)
+{
+	Name=InName.c_str();
+	Size=InSize;
+	LastModified=InLastModified.c_str();
+	StorageClass=InStorageClass.c_str();
+	Type=InType.c_str();
+	Owner=InOwner.c_str();
+}
+
+FOssFileInfo::FOssFileInfo(const FString& InName, const int64& InSize, const FString& InLastModified, const FString& InStorageClass, const FString& InType,
+	const FString& InOwner)
+{
+	Name=InName;
+	Size=InSize;
+	LastModified=InLastModified;
+	StorageClass=InStorageClass;
+	Type=InType;
+	Owner=InOwner;
 }

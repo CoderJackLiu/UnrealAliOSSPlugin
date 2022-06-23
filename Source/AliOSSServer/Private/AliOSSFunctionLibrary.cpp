@@ -104,11 +104,11 @@ bool UAliOSSFunctionLibrary::DoesBucketExist(const FOSSAccountInfo& AccountInfo,
 	/* 判断存储空间是否存在 */
 	if (Client.DoesBucketExist(TCHAR_TO_ANSI(*BucketName)))
 	{
-		UE_LOG(LogOSSServer,Warning,TEXT("The Bucket exists"));
+		UE_LOG(LogOSSServer, Warning, TEXT("The Bucket exists"));
 	}
 	else
 	{
-		UE_LOG(LogOSSServer,Warning,TEXT("The Bucket does not exist"));
+		UE_LOG(LogOSSServer, Warning, TEXT("The Bucket does not exist"));
 	}
 
 	/* 释放网络等资源 */
@@ -234,11 +234,10 @@ bool UAliOSSFunctionLibrary::OssAppendUploadDataFromMemory(const FOSSAccountInfo
 	return true;
 }
 
-void ProgressCallback(size_t increment, int64_t transfered, int64_t total, void* userData)
+void UpLoadProgressCallback(size_t increment, int64_t transfered, int64_t total, void* userData)
 {
-	std::cout << "ProgressCallback[" << userData << "] => " <<increment <<" ," << transfered << "," << total << std::endl;
-	UE_LOG(LogOSSServer,Warning,TEXT("increment : %d ;transfered : %d ;total : %d"),increment,transfered,total);
-	
+	std::cout << "ProgressCallback[" << userData << "] => " << increment << " ," << transfered << "," << total << std::endl;
+	UE_LOG(LogOSSServer, Warning, TEXT("increment : %d ;transfered : %d ;total : %d"), increment, transfered, total);
 }
 
 bool UAliOSSFunctionLibrary::OssUploadWithProgress(const FOSSAccountInfo& AccountInfo, const FString& BucketName, const FString& ObjectName)
@@ -246,20 +245,21 @@ bool UAliOSSFunctionLibrary::OssUploadWithProgress(const FOSSAccountInfo& Accoun
 	/* 初始化OSS账号信息 */
 	/* 初始化网络等资源 */
 	InitializeSdk();
-	OssClient client=GetDefaultOssClient(AccountInfo);
+	OssClient client = GetDefaultOssClient(AccountInfo);
 
-	std::shared_ptr<std::iostream> content = std::make_shared<std::fstream>("yourLocalFilename", std::ios::in|std::ios::binary);
+	std::shared_ptr<std::iostream> content = std::make_shared<std::fstream>("yourLocalFilename", std::ios::in | std::ios::binary);
 	PutObjectRequest request(ToStdString(BucketName), ToStdString(ObjectName), content);
-  
-	TransferProgress progressCallback = { ProgressCallback , nullptr };
+
+	TransferProgress progressCallback = {UpLoadProgressCallback, nullptr};
 	request.setTransferProgress(progressCallback);
-   
+
 	/* 上传文件 */
 	auto outcome = client.PutObject(request);
 
-	if (!outcome.isSuccess()) {
+	if (!outcome.isSuccess())
+	{
 		/* 异常处理 */
-		AlibabaPutOutComePrintOut("PutObject fail",outcome);
+		AlibabaOutComePrintOut("PutObject fail", outcome);
 		ShutdownSdk();
 		return false;
 	}
@@ -296,7 +296,7 @@ bool UAliOSSFunctionLibrary::OssDownLoadAFile(const FOSSAccountInfo& AccountInfo
 	else
 	{
 		/* 异常处理。*/
-		AlibabaGetOutComePrintOut("GetObjectToFile fail",outcome);
+		AlibabaOutComePrintOut("GetObjectToFile fail", outcome);
 		ShutdownSdk();
 		return false;
 	}
@@ -310,36 +310,226 @@ bool UAliOSSFunctionLibrary::OssDownLoadAFile(const FOSSAccountInfo& AccountInfo
 bool UAliOSSFunctionLibrary::OssDownLoadAFileToMemory(const FOSSAccountInfo& AccountInfo, const FString& BucketName, const FString& ObjectName)
 {
 	/*初始化OSS账号信息。*/
-	OssClient client=GetDefaultOssClient(AccountInfo);
+	OssClient client = GetDefaultOssClient(AccountInfo);
 	/*初始化网络等资源。*/
 	InitializeSdk();
 	/*获取文件到本地内存。*/
 	GetObjectRequest request(ToStdString(BucketName), ToStdString(ObjectName));
 	auto outcome = client.GetObject(request);
-	if (outcome.isSuccess()) {
+	if (outcome.isSuccess())
+	{
 		//todo log for out succeed！
 		std::cout << "getObjectToBuffer" << " success, Content-Length:" << outcome.result().Metadata().ContentLength() << std::endl;
-		
+
 		/*通过read接口读取数据。*/
 		auto& stream = outcome.result().Content();
 		char buffer[256];
-		while (stream->good()) {
+		while (stream->good())
+		{
 			stream->read(buffer, 256);
 			auto count = stream->gcount();
 			/*根据实际情况处理数据。*/
-			
 		}
 	}
-	else {
+	else
+	{
 		/*异常处理。*/
-		AlibabaGetOutComePrintOut("getObjectToBuffer fail",outcome);
+		AlibabaOutComePrintOut("getObjectToBuffer fail", outcome);
+		ShutdownSdk();
+		return false;
+	}
+	/*释放网络等资源。*/
+	ShutdownSdk();
+	return false;
+}
+
+void DownLoadProgressCallback(size_t increment, int64_t transfered, int64_t total, void* userData)
+{
+	std::cout << "ProgressCallback[" << userData << "] => " << increment << " ," << transfered << "," << total << std::endl;
+	UE_LOG(LogOSSServer, Warning, TEXT("increment : %d ;transfered : %d ;total : %d"), increment, transfered, total);
+}
+
+bool UAliOSSFunctionLibrary::OssDownLoadWithProcess(const FOSSAccountInfo& AccountInfo, const FString& BucketName, const FString& ObjectName)
+{
+	/* 初始化网络等资源 */
+	InitializeSdk();
+
+	const OssClient Client = GetDefaultOssClient(AccountInfo);
+
+	/* 获取文件 */
+	GetObjectRequest request(ToStdString(BucketName), ToStdString(ObjectName));
+	TransferProgress ProgressCallback = {DownLoadProgressCallback, nullptr};
+	request.setTransferProgress(ProgressCallback);
+
+	auto outcome = Client.GetObject(request);
+
+	if (!outcome.isSuccess())
+	{
+		/* 异常处理 */
+		AlibabaOutComePrintOut("getObject fail", outcome);
 		ShutdownSdk();
 		return false;
 	}
 
-	/*释放网络等资源。*/
+	/* 释放网络等资源 */
 	ShutdownSdk();
-	return false;
+	return true;
+}
+
+bool UAliOSSFunctionLibrary::OssListFilesDefaultOrder(const FOSSAccountInfo& AccountInfo, const FString& BucketName)
+{
+	InitializeSdk();
+
+	const OssClient Client = GetDefaultOssClient(AccountInfo);
+
+	/* 列举文件。*/
+	const ListObjectsRequest Request(ToStdString(BucketName));
+	auto outcome = Client.ListObjects(Request);
+
+	if (!outcome.isSuccess())
+	{
+		/* 异常处理。*/
+		std::cout << "ListObjects fail" <<
+			",code:" << outcome.error().Code() <<
+			",message:" << outcome.error().Message() <<
+			",requestId:" << outcome.error().RequestId() << std::endl;
+
+		ShutdownSdk();
+		return false;
+	}
+	else
+	{
+		for (const auto& object : outcome.result().ObjectSummarys())
+		{
+			std::cout << "object" <<
+				",name:" << object.Key() <<
+				",size:" << object.Size() <<
+				",lastmodify time:" << object.LastModified() << std::endl;
+			
+		}
+	}
+
+	/* 释放网络等资源。*/
+	ShutdownSdk();
+	return true;
+}
+
+bool UAliOSSFunctionLibrary::OssListBucketNumFile(const FOSSAccountInfo& AccountInfo, const FString& BucketName,const int32& NumTolist)
+{
+	InitializeSdk();
+
+	ClientConfiguration conf;
+	const OssClient Client=GetDefaultOssClient(AccountInfo) ;
+
+	/* 列举文件。*/
+	ListObjectsRequest Request(ToStdString(BucketName));
+	/* 设置列举文件的最大个数为200。*/
+	Request.setMaxKeys(NumTolist);
+	auto outcome = Client.ListObjects(Request);
+
+	if (!outcome.isSuccess( )) {    
+		/* 异常处理。*/
+		std::cout << "ListObjects fail" <<
+		",code:" << outcome.error().Code() <<
+		",message:" << outcome.error().Message() <<
+		",requestId:" << outcome.error().RequestId() << std::endl;
+		ShutdownSdk();
+		return false;  
+	}
+	else {
+		for (const auto& object : outcome.result().ObjectSummarys()) {
+			std::cout << "object"<<
+			",name:" << object.Key() <<
+			",size:" << object.Size() <<
+			",lastmodify time:" << object.LastModified() << std ::endl; 
+		}      
+	}
+
+	/* 释放网络等资源。*/
+	ShutdownSdk();
+	return true;
+}
+
+bool UAliOSSFunctionLibrary::OssSetBucketVersioning(const FOSSAccountInfo& AccountInfo, const FString& BucketName, const bool& bIsEnable)
+{
+	InitializeSdk();
+	OssClient client = GetDefaultOssClient(AccountInfo);
+	/*创建bucket版本配置，状态设置为Enabled或Suspended*/
+	SetBucketVersioningRequest Request(ToStdString(BucketName), VersioningStatus::Enabled);
+	auto Outcome = client.SetBucketVersioning(Request);
+	if (!Outcome.isSuccess())
+	{
+		/* 异常处理 */
+		AlibabaOutComePrintOut("SetBucketVersioning fail", Outcome.error().Code().c_str(), Outcome.error().Message().c_str(), Outcome.error().RequestId().c_str());
+		ShutdownSdk();
+		return false;
+	}
+	/*释放网络等资源*/
+	ShutdownSdk();
+	return true;
+}
+
+bool UAliOSSFunctionLibrary::OssGetBucketVersion(const FOSSAccountInfo& AccountInfo, const FString& BucketName)
+{
+	InitializeSdk();
+	OssClient client = GetDefaultOssClient(AccountInfo);
+	/**/
+	SetBucketVersioningRequest Request(ToStdString(BucketName), VersioningStatus::Enabled);
+	auto Outcome = client.GetBucketVersioning(GetBucketVersioningRequest(ToStdString(BucketName)));
+	if (!Outcome.isSuccess())
+	{
+		/* 异常处理 */
+		AlibabaOutComePrintOut("GetBucketVersioning fail", Outcome.error().Code().c_str(), Outcome.error().Message().c_str(), Outcome.error().RequestId().c_str());
+		ShutdownSdk();
+		return false;
+	}
+	/*释放网络等资源*/
+	ShutdownSdk();
+	return true;
+}
+
+bool UAliOSSFunctionLibrary::OssListBucketAllFileVersion(const FOSSAccountInfo& AccountInfo, const FString& BucketName)
+{
+	/* 初始化网络等资源 */
+	InitializeSdk();
+
+	ClientConfiguration conf;
+	const OssClient Client = GetDefaultOssClient(AccountInfo);
+
+	ListObjectVersionsRequest request(ToStdString(BucketName));
+	bool IsTruncated = false;
+
+	do
+	{
+		auto Outcome = Client.ListObjectVersions(request);
+
+		if (Outcome.isSuccess())
+		{
+			/*查看列出的object删除标记的各版本信息*/
+			for (auto const& marker : Outcome.result().DeleteMarkerSummarys())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("marker key: %s ,marker versionid:%s"), *marker.Key().c_str(), *marker.VersionId().c_str());
+			}
+
+			/*查看列出的object各版本信息*/
+			for (auto const& obj : Outcome.result().ObjectVersionSummarys())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("object key: %s ,object versionid:%s"), *obj.Key().c_str(), *obj.VersionId().c_str());
+			}
+		}
+		else
+		{
+			AlibabaOutComePrintOut("ListObjectVersions fail", Outcome.error().Code().c_str(), Outcome.error().Message().c_str(), Outcome.error().RequestId().c_str());
+			break;
+		}
+		request.setKeyMarker(Outcome.result().NextKeyMarker());
+		request.setVersionIdMarker(Outcome.result().NextVersionIdMarker());
+		IsTruncated = Outcome.result().IsTruncated();
+	}
+	while (IsTruncated);
+	/* 释放网络等资源 */
+	ShutdownSdk();
+	return true;
 }
 
 
@@ -369,14 +559,10 @@ void UAliOSSFunctionLibrary::AlibabaPrintOut(const FString& FailedTitle)
 	UE_LOG(LogOSSServer, Error, TEXT("%s"), *FailedTitle);
 }
 
-void UAliOSSFunctionLibrary::AlibabaGetOutComePrintOut(const FString& FailedTitle, GetObjectOutcome OutCome)
+
+template <typename T>
+void UAliOSSFunctionLibrary::AlibabaOutComePrintOut(const FString& FailedTitle, const T& OutCome)
 {
 	UE_LOG(LogOSSServer, Error, TEXT("%s : code is : %s ;\n Message is %s ;\n RequestId is %s; \n"), *FailedTitle, *OutCome.error().Code().c_str(),
 	       *OutCome.error().Message().c_str(), *OutCome.error().RequestId().c_str());
-}
-
-void UAliOSSFunctionLibrary::AlibabaPutOutComePrintOut(const FString& FailedTitle, AlibabaCloud::OSS::PutObjectOutcome OutCome)
-{
-	UE_LOG(LogOSSServer, Error, TEXT("%s : code is : %s ;\n Message is %s ;\n RequestId is %s; \n"), *FailedTitle, *OutCome.error().Code().c_str(),
-		   *OutCome.error().Message().c_str(), *OutCome.error().RequestId().c_str());
 }

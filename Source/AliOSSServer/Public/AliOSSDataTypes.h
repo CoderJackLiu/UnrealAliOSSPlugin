@@ -46,6 +46,42 @@ public:
 	
 };
 
+USTRUCT(BlueprintType, Category = "OSS DataType")
+/** The name, size, shape, and type of the tensor */
+struct FOssFileInfo
+{
+	GENERATED_BODY()
+
+public:
+	/** Default constructor */
+	FOssFileInfo();
+
+	/** Construct from standard information of onnx runtime session */
+	FOssFileInfo(const std::string& InName, const int64_t& InSize, const std::string& InLastModified, const std::string& InStorageClass, const std::string& InType,
+		const std::string& InOwner);
+
+	/** Construct from specified parameters */
+	FOssFileInfo(const FString& InName, const int64& InSize, const FString& InLastModified, const FString& InStorageClass, const FString& InType, const FString& InOwner);
+
+	
+	/** The AccessKeyId of the AccountInfo. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ONNX Runtime")
+	FString Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ONNX Runtime")
+	int64 Size;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ONNX Runtime")
+	FString LastModified;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ONNX Runtime")
+	FString StorageClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ONNX Runtime")
+	FString Type;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ONNX Runtime")
+	FString Owner;
+
+	
+	
+};
+
 
 UCLASS()
 class ALIOSSSERVER_API UAliOSSDataTypes : public UObject
