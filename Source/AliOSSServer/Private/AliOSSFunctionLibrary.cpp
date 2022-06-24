@@ -391,16 +391,16 @@ TArray<FOssFileInfo> UAliOSSFunctionLibrary::OssListFilesDefaultOrder(const FOSS
 	if (!outcome.isSuccess())
 	{
 		/* 异常处理。*/
-		AlibabaOutComePrintOut("ListObjects fail",outcome);
+		AlibabaOutComePrintOut("ListObjects fail", outcome);
 		ShutdownSdk();
 	}
 	else
 	{
 		for (const auto& object : outcome.result().ObjectSummarys())
 		{
-			UE_LOG(LogOSSServer,Warning,TEXT("object info name: %s ,size : %d ,lastmodify time ：%s"),*object.Key().c_str(),object.Size(),*object.LastModified().c_str());
-			FileInfos.Add(FOssFileInfo(object.Key(),object.Size(),object.LastModified(),object.StorageClass(),object.Type(),object.Owner()));
-			
+			UE_LOG(LogOSSServer, Warning, TEXT("object info name: %s ,size : %d ,lastmodify time ：%s"), *object.Key().c_str(), object.Size(),
+			       *object.LastModified().c_str());
+			FileInfos.Add(FOssFileInfo(object.Key(), object.Size(), object.LastModified(), object.StorageClass(), object.Type(), object.Owner()));
 		}
 	}
 	/* 释放网络等资源。*/
@@ -408,40 +408,35 @@ TArray<FOssFileInfo> UAliOSSFunctionLibrary::OssListFilesDefaultOrder(const FOSS
 	return FileInfos;
 }
 
-bool UAliOSSFunctionLibrary::OssListBucketNumFile(const FOSSAccountInfo& AccountInfo, const FString& BucketName,const int32& NumTolist)
+TArray<FOssObjectSummary> UAliOSSFunctionLibrary::OssListBucketNumFile(const FOSSAccountInfo& AccountInfo, const FString& BucketName, const int32& NumTolist)
 {
+	TArray<FOssObjectSummary> ObjectSummaries;
 	InitializeSdk();
 
 	ClientConfiguration conf;
-	const OssClient Client=GetDefaultOssClient(AccountInfo) ;
+	const OssClient Client = GetDefaultOssClient(AccountInfo);
 
 	/* 列举文件。*/
 	ListObjectsRequest Request(ToStdString(BucketName));
 	/* 设置列举文件的最大个数为200。*/
 	Request.setMaxKeys(NumTolist);
-	auto outcome = Client.ListObjects(Request);
+	auto Outcome = Client.ListObjects(Request);
 
-	if (!outcome.isSuccess( )) {    
+	if (!Outcome.isSuccess())
+	{
 		/* 异常处理。*/
-		std::cout << "ListObjects fail" <<
-		",code:" << outcome.error().Code() <<
-		",message:" << outcome.error().Message() <<
-		",requestId:" << outcome.error().RequestId() << std::endl;
-		ShutdownSdk();
-		return false;  
+		AlibabaOutComePrintOut("ListObjects fail", Outcome.error().Code().c_str(), Outcome.error().Message().c_str(), Outcome.error().RequestId().c_str());
 	}
-	else {
-		for (const auto& object : outcome.result().ObjectSummarys()) {
-			std::cout << "object"<<
-			",name:" << object.Key() <<
-			",size:" << object.Size() <<
-			",lastmodify time:" << object.LastModified() << std ::endl; 
-		}      
+	else
+	{
+		for (const auto& object : Outcome.result().ObjectSummarys())
+		{
+			ObjectSummaries.Add(FOssObjectSummary(object));
+		}
 	}
-
 	/* 释放网络等资源。*/
 	ShutdownSdk();
-	return true;
+	return ObjectSummaries;
 }
 
 bool UAliOSSFunctionLibrary::OssSetBucketVersioning(const FOSSAccountInfo& AccountInfo, const FString& BucketName, const bool& bIsEnable)
@@ -463,7 +458,7 @@ bool UAliOSSFunctionLibrary::OssSetBucketVersioning(const FOSSAccountInfo& Accou
 	return true;
 }
 
-bool UAliOSSFunctionLibrary::OssGetBucketVersion(const FOSSAccountInfo& AccountInfo, const FString& BucketName)
+bool UAliOSSFunctionLibrary::OssGetBucketVersion(const FOSSAccountInfo& AccountInfo, const FString& BucketName, EOssBucketVersionStatus& VersionStatus)
 {
 	InitializeSdk();
 	OssClient client = GetDefaultOssClient(AccountInfo);
@@ -477,6 +472,7 @@ bool UAliOSSFunctionLibrary::OssGetBucketVersion(const FOSSAccountInfo& AccountI
 		ShutdownSdk();
 		return false;
 	}
+	VersionStatus = ConvertOssBucketVersionStatus(Outcome.result().Status());
 	/*释放网络等资源*/
 	ShutdownSdk();
 	return true;
@@ -503,6 +499,7 @@ bool UAliOSSFunctionLibrary::OssListBucketAllFileVersion(const FOSSAccountInfo& 
 			for (auto const& marker : Outcome.result().DeleteMarkerSummarys())
 			{
 				UE_LOG(LogTemp, Warning, TEXT("marker key: %s ,marker versionid:%s"), *marker.Key().c_str(), *marker.VersionId().c_str());
+				
 			}
 
 			/*查看列出的object各版本信息*/
@@ -541,6 +538,26 @@ OssClient UAliOSSFunctionLibrary::GetDefaultOssClient(const FOSSAccountInfo& Acc
 std::string UAliOSSFunctionLibrary::ToStdString(const FString& InStr)
 {
 	return TCHAR_TO_ANSI(*InStr);
+}
+
+EOssBucketVersionStatus UAliOSSFunctionLibrary::ConvertOssBucketVersionStatus(const AlibabaCloud::OSS::VersioningStatus& VersioningStatus)
+{
+	EOssBucketVersionStatus status;
+	switch (VersioningStatus)
+	{
+	case VersioningStatus::NotSet:
+		status = EOssBucketVersionStatus::NotSet;
+		break;
+	case VersioningStatus::Enabled:
+		status = EOssBucketVersionStatus::Enabled;
+		break;
+	case VersioningStatus::Suspended:
+		status = EOssBucketVersionStatus::Suspended;
+		break;
+	default:
+		status = EOssBucketVersionStatus::NotSet;
+	}
+	return status;
 }
 
 void UAliOSSFunctionLibrary::AlibabaOutComePrintOut(const FString& FailedTitle, const FString& Code, const FString& Message, const FString& RequestId)

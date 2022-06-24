@@ -49,8 +49,8 @@ public:
 
 
 	/*
-	 * upload files functions !
-	 * 
+	 * upload functions !
+	 * 上传相关！
 	 */
 
 	//上传一个文件
@@ -73,7 +73,7 @@ public:
 	
 	
 	/*
-	 * download files
+	 * download functions！
 	 * 下载文件 相关
 	 */
 
@@ -109,7 +109,7 @@ public:
 	//列举指定个数的文件
 	//list dynamic numbers of files 
 	UFUNCTION(BlueprintCallable, Category="AliOSSServer|VersionControl")
-	static bool OssListBucketNumFile(const FOSSAccountInfo& AccountInfo, const FString& BucketName,const int32& NumTolist);
+	static TArray<FOssObjectSummary> OssListBucketNumFile(const FOSSAccountInfo& AccountInfo, const FString& BucketName,const int32& NumTolist);
 	
 	
 	/*
@@ -130,18 +130,13 @@ public:
 	//获取Bucket版本控制状态信息
 	//Get Bucket version control info 
 	UFUNCTION(BlueprintCallable, Category="AliOSSServer|VersionControl")
-	static bool OssGetBucketVersion(const FOSSAccountInfo& AccountInfo, const FString& BucketName);
+	static bool OssGetBucketVersion(const FOSSAccountInfo& AccountInfo, const FString& BucketName,EOssBucketVersionStatus& VersionStatus);
 
 	//列举Bucket中所有Object的版本信息
 	//List All Bucket files version info;
 	UFUNCTION(BlueprintCallable, Category="AliOSSServer|VersionControl")
 	static bool OssListBucketAllFileVersion(const FOSSAccountInfo& AccountInfo, const FString& BucketName);
 
-
-
-	
-
-	
 	
 	/*
 	 * Utilities function
@@ -158,6 +153,8 @@ public:
 	static AlibabaCloud::OSS::OssClient GetDefaultOssClient(const FOSSAccountInfo& AccountInfo);
 
 	static std::string ToStdString(const FString& InStr);
+
+	static EOssBucketVersionStatus ConvertOssBucketVersionStatus(const AlibabaCloud::OSS::VersioningStatus& VersioningStatus);
 };
 
 

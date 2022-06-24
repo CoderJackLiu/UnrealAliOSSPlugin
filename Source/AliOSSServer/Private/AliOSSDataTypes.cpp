@@ -67,3 +67,18 @@ FOssFileInfo::FOssFileInfo(const FString& InName, const int64& InSize, const FSt
 	Type = InType;
 	Owner = FOssOwner(InOwner);
 }
+
+FOssObjectSummary::FOssObjectSummary(): Size(0)
+{
+}
+
+FOssObjectSummary::FOssObjectSummary(const AlibabaCloud::OSS::ObjectSummary& ObjectSummary)
+{
+	Key=ObjectSummary.Key().c_str();
+	ETag=ObjectSummary.ETag().c_str();
+	Size=ObjectSummary.Size();
+	LastModified=ObjectSummary.LastModified().c_str();
+	StorageClass=ObjectSummary.StorageClass().c_str();
+	Type=ObjectSummary.Type().c_str();
+	Owner=ObjectSummary.Owner();
+}
