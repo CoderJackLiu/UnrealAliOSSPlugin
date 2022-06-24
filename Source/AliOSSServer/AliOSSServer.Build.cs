@@ -22,30 +22,30 @@ public class AliOSSServer : ModuleRules
 				// ... add public include paths required here ...
 			}
 			);
-		string IncludePath = Path.Combine(ThirdPartyPath, "include");
-		PublicIncludePaths.Add(IncludePath);
+		string includePath = Path.Combine(ThirdPartyPath, "include");
+		PublicIncludePaths.Add(includePath);
 		
-		string AlibabaPath = Path.Combine(IncludePath, "alibabacloud");
-		PublicIncludePaths.Add(AlibabaPath);
+		string alibabaPath = Path.Combine(includePath, "alibabacloud");
+		PublicIncludePaths.Add(alibabaPath);
 		
-		string AlibabaOssPath = Path.Combine(AlibabaPath, "oss");
-		PublicIncludePaths.Add(AlibabaOssPath);
+		string alibabaOssPath = Path.Combine(alibabaPath, "oss");
+		PublicIncludePaths.Add(alibabaOssPath);
 		
-		PublicIncludePaths.Add(Path.Combine(AlibabaOssPath, "auth"));		
-		PublicIncludePaths.Add(Path.Combine(AlibabaOssPath, "client"));		
-		PublicIncludePaths.Add(Path.Combine(AlibabaOssPath, "encryption"));		
-		PublicIncludePaths.Add(Path.Combine(AlibabaOssPath, "http"));		
-		PublicIncludePaths.Add(Path.Combine(AlibabaOssPath, "model"));		
-		PublicIncludePaths.Add(Path.Combine(AlibabaOssPath, "utils"));	
+		PublicIncludePaths.Add(Path.Combine(alibabaOssPath, "auth"));		
+		PublicIncludePaths.Add(Path.Combine(alibabaOssPath, "client"));		
+		PublicIncludePaths.Add(Path.Combine(alibabaOssPath, "encryption"));		
+		PublicIncludePaths.Add(Path.Combine(alibabaOssPath, "http"));		
+		PublicIncludePaths.Add(Path.Combine(alibabaOssPath, "model"));		
+		PublicIncludePaths.Add(Path.Combine(alibabaOssPath, "utils"));	
 		
-		PublicIncludePaths.Add(Path.Combine(IncludePath, "curl"));		
-		PublicIncludePaths.Add(Path.Combine(IncludePath, "openssl"));
+		PublicIncludePaths.Add(Path.Combine(includePath, "curl"));		
+		PublicIncludePaths.Add(Path.Combine(includePath, "openssl"));
 
-		string LibPath = Path.Combine(ThirdPartyPath, "lib/x64");
-		PublicAdditionalLibraries.Add(Path.Combine(LibPath, "alibabacloud-oss-cpp-sdk.lib"));
-		PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libcurl.lib"));
-		PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libeay32.lib"));
-		PublicAdditionalLibraries.Add(Path.Combine(LibPath, "ssleay32.lib"));
+		string libPath = Path.Combine(ThirdPartyPath, "lib/x64");
+		PublicAdditionalLibraries.Add(Path.Combine(libPath, "alibabacloud-oss-cpp-sdk.lib"));
+		PublicAdditionalLibraries.Add(Path.Combine(libPath, "libcurl.lib"));
+		PublicAdditionalLibraries.Add(Path.Combine(libPath, "libeay32.lib"));
+		PublicAdditionalLibraries.Add(Path.Combine(libPath, "ssleay32.lib"));
 
 		// PublicDelayLoadDLLs.Add(Path.Combine(LibPath, "libcurl.dll"));
 		// PublicDelayLoadDLLs.Add(Path.Combine(LibPath, "libeay32.dll"));

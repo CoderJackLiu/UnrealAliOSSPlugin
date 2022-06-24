@@ -6,6 +6,7 @@
 #include <Types.h>
 
 #include "CoreMinimal.h"
+#include "AliOSSDataTypes.h"
 
 #include "AliOSSFunctionLibrary.generated.h"
 
@@ -103,7 +104,7 @@ public:
 	//列举文件
 	//list files as 
 	UFUNCTION(BlueprintCallable, Category="AliOSSServer|FileManage")
-	static bool OssListFilesDefaultOrder(const FOSSAccountInfo& AccountInfo, const FString& BucketName);
+	static TArray<FOssFileInfo> OssListFilesDefaultOrder(const FOSSAccountInfo& AccountInfo, const FString& BucketName);
 
 	//列举指定个数的文件
 	//list dynamic numbers of files 

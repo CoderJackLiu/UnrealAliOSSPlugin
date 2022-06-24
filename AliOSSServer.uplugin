@@ -21,6 +21,12 @@
 			"Type": "Runtime",
 			"LoadingPhase": "PreDefault",
 			"PlatformAllowList": [ "Win64" ]
+		},{
+			"Name": "AliOSSServerDemo",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault",
+			"PlatformAllowList": [ "Win64" ]
 		}
+		
 	]
 }

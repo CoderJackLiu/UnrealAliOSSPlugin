@@ -376,8 +376,10 @@ bool UAliOSSFunctionLibrary::OssDownLoadWithProcess(const FOSSAccountInfo& Accou
 	return true;
 }
 
-bool UAliOSSFunctionLibrary::OssListFilesDefaultOrder(const FOSSAccountInfo& AccountInfo, const FString& BucketName)
+TArray<FOssFileInfo> UAliOSSFunctionLibrary::OssListFilesDefaultOrder(const FOSSAccountInfo& AccountInfo, const FString& BucketName)
 {
+	TArray<FOssFileInfo> FileInfos;
+
 	InitializeSdk();
 
 	const OssClient Client = GetDefaultOssClient(AccountInfo);
@@ -389,29 +391,21 @@ bool UAliOSSFunctionLibrary::OssListFilesDefaultOrder(const FOSSAccountInfo& Acc
 	if (!outcome.isSuccess())
 	{
 		/* 异常处理。*/
-		std::cout << "ListObjects fail" <<
-			",code:" << outcome.error().Code() <<
-			",message:" << outcome.error().Message() <<
-			",requestId:" << outcome.error().RequestId() << std::endl;
-
+		AlibabaOutComePrintOut("ListObjects fail",outcome);
 		ShutdownSdk();
-		return false;
 	}
 	else
 	{
 		for (const auto& object : outcome.result().ObjectSummarys())
 		{
-			std::cout << "object" <<
-				",name:" << object.Key() <<
-				",size:" << object.Size() <<
-				",lastmodify time:" << object.LastModified() << std::endl;
+			UE_LOG(LogOSSServer,Warning,TEXT("object info name: %s ,size : %d ,lastmodify time ：%s"),*object.Key().c_str(),object.Size(),*object.LastModified().c_str());
+			FileInfos.Add(FOssFileInfo(object.Key(),object.Size(),object.LastModified(),object.StorageClass(),object.Type(),object.Owner()));
 			
 		}
 	}
-
 	/* 释放网络等资源。*/
 	ShutdownSdk();
-	return true;
+	return FileInfos;
 }
 
 bool UAliOSSFunctionLibrary::OssListBucketNumFile(const FOSSAccountInfo& AccountInfo, const FString& BucketName,const int32& NumTolist)

@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <Owner.h>
+
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 #include "AliOSSDataTypes.generated.h"
@@ -45,7 +47,28 @@ public:
 	std::string GetEndpoint() const {return TCHAR_TO_ANSI(*AccessKeyId);}
 	
 };
+USTRUCT(BlueprintType, Category = "OSS DataType")
+/** The name, size, shape, and type of the tensor */
+struct FOssOwner
+{
+	GENERATED_BODY()
 
+public:
+	
+	/** Default constructor */
+	FOssOwner();
+	
+	FOssOwner(const std::string& InId, const std::string& InName);
+	
+	FOssOwner(const FString& InId, const FString& InName);
+
+	FOssOwner(const AlibabaCloud::OSS::Owner & InOwner);
+	
+private:
+
+	FString Id;
+	FString Name;
+};
 USTRUCT(BlueprintType, Category = "OSS DataType")
 /** The name, size, shape, and type of the tensor */
 struct FOssFileInfo
@@ -58,10 +81,10 @@ public:
 
 	/** Construct from standard information of onnx runtime session */
 	FOssFileInfo(const std::string& InName, const int64_t& InSize, const std::string& InLastModified, const std::string& InStorageClass, const std::string& InType,
-		const std::string& InOwner);
+		const AlibabaCloud::OSS::Owner& InOwner);
 
 	/** Construct from specified parameters */
-	FOssFileInfo(const FString& InName, const int64& InSize, const FString& InLastModified, const FString& InStorageClass, const FString& InType, const FString& InOwner);
+	FOssFileInfo(const FString& InName, const int64& InSize, const FString& InLastModified, const FString& InStorageClass, const FString& InType, const AlibabaCloud::OSS::Owner& InOwner);
 
 	
 	/** The AccessKeyId of the AccountInfo. */
@@ -76,7 +99,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ONNX Runtime")
 	FString Type;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ONNX Runtime")
-	FString Owner;
+	FOssOwner Owner;
 
 	
 	
